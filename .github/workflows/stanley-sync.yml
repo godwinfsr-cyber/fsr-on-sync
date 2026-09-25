@@ -42,7 +42,7 @@ jobs:
       USD_INR_RATE_MAX_AGE_HOURS: "24"
       STANLEY_FX_PROVIDER: open.er-api.com
       STANLEY_PRICE_ROUNDING_MODE: NONE
-      STANLEY_NEW_PRODUCT_STATUS: DRAFT
+      STANLEY_NEW_PRODUCT_STATUS: ACTIVE     # new launches go live and are published automatically (store owner, 2026-09-26)
       STANLEY_PRODUCT_MISSING_CONFIRMATION_SCANS: "2"
       STANLEY_MISSING_ACTION: archive
     steps:
