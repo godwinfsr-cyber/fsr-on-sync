@@ -8,3 +8,4 @@ data/*
 !data/stanley-sync.sqlite
 !data/michaelkors-sync.sqlite
 !data/alo-sync.sqlite
+!data/toryburch-sync.sqlite

@@ -1,0 +1,89 @@
+name: Tory Burch -> Full Size Run sync
+
+on:
+  schedule:
+    - cron: "5 */5 * * *"   # every 5 hours (UTC), offset from ON.com (:00), Gymshark (:15), Rhode (:30), Stanley (:45), Michael Kors (:50). GitHub may start a few minutes late.
+  push:
+    branches: [main]
+    paths: [.github/workflows/toryburch-sync.yml, src/toryburch/**, test/toryburch.test.ts]   # changed sync code: a 3-product DRY RUN only
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "live or dry-run"
+        default: live
+        type: choice
+        options: [live, dry-run]
+
+permissions:
+  contents: write            # commit the updated Tory Burch sync database back to the repo
+
+concurrency:
+  group: toryburch-sync
+  cancel-in-progress: false  # never run two Tory Burch syncs at once; queue instead
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350     # ~3,200 product pages at a 2 s gap (~1.8 h) + Shopify writes; the first full import needs the most
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # Full Size Run is an official / authorized Tory Burch importer for India (store owner, 2026-09-26).
+      # Watches are always excluded in code. Settings stored in the database (cli `set`) win over these.
+      TORY_BURCH_AUTHORIZED_IMPORTER: "true"
+      TORY_BURCH_ENABLED: "true"
+      TORY_BURCH_DRY_RUN: "false"
+      TORY_BURCH_SYNC_INTERVAL_HOURS: "5"
+      TORY_BURCH_ETA: "15–20 Days"
+      TORY_BURCH_NEW_PRODUCT_STATUS: ACTIVE
+      USD_INR_RATE_MAX_AGE_HOURS: "24"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/toryburch.test.ts
+
+      - name: Run Tory Burch sync
+        run: |
+          mkdir -p logs
+          node src/toryburch/cli.ts unlock
+          # reads toryburch.com directly (robots-allowed sitemap + product pages, honest User-Agent, 2 s gap).
+          # A 403 / CAPTCHA / challenge stops the run (SOURCE_SCAN_UNRELIABLE) - it is never bypassed.
+          node src/toryburch/cli.ts set SOURCE_MODE http
+          node src/toryburch/cli.ts set REQUEST_DELAY_MS 2000
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node src/toryburch/cli.ts sync --dry-run --limit 3 --trigger push-check
+          elif [ "${{ github.event.inputs.mode }}" = "dry-run" ]; then
+            node src/toryburch/cli.ts sync --dry-run --trigger manual
+          else
+            node src/toryburch/cli.ts sync --live --trigger scheduler
+          fi
+
+      - name: Save Tory Burch database
+        if: always()
+        run: |
+          node src/toryburch/cli.ts checkpoint
+          git config user.name "fsr-toryburch-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/toryburch-sync.sqlite
+          git diff --cached --quiet && exit 0
+          git commit -m "toryburch sync: update database [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 10; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: toryburch-sync-report-${{ github.run_id }}
+          path: logs/TORYBURCH-SYNC-*.report.*
+          if-no-files-found: ignore
+          retention-days: 30
