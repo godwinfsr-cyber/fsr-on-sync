@@ -328,6 +328,19 @@ test("normalize: colourways sharing a name get stable colour-code suffixes, what
   assert.equal(ab.W6491R088110, "Athletic Heather Grey/White (08811)");
 });
 
+test("plan: a discontinued colourway sharing the current colour name is suffixed, never duplicated", () => {
+  const cur = listing({ id: 50, handle: "w6491r-skirt-ahg-white", title: "Skirt - AHG/White", type: "Women:Bottoms:Skirts", style: "W6491R", colour: "AHG/White", code: "06509", sizes: ["XS", "S"], price: "98.00" });
+  const n = normalizeAlo(groupAloCatalog([cur], settings).styles[0], { barcodes: {}, attribs: null }, settings);
+  const prices = pricesFor(n, fx85, settings);
+  const existing = asShopify(buildAloPlan({ n, existing: null, row: undefined, settings, prices, fx: fx85, images: [], locationId: null, nowIso: "x" }).input);
+  existing.variants.nodes.forEach((v) => { v.selectedOptions = v.selectedOptions.map((o) => (o.name === "Color" ? { ...o, value: "AHG/White (06509)" } : o)); });
+  existing.variants.nodes.push(...["XS", "S"].map((sz, i) => ({ id: `gid://shopify/ProductVariant/9${i}`, sku: `W6491R05203${i}`, barcode: null, price: "11000.00", compareAtPrice: null, inventoryPolicy: "DENY" as const, selectedOptions: [{ name: "Color", value: "AHG/White" }, { name: "Size", value: sz }], media: { nodes: [] } })));
+  const plan = buildAloPlan({ n, existing, row: { written_prices: "{}" } as never, settings, prices, fx: fx85, images: [], locationId: null, nowIso: "x" });
+  const combos = (plan.input.variants as { optionValues: { name: string }[] }[]).map((v) => v.optionValues.map((o) => o.name).join(" / "));
+  assert.equal(new Set(combos).size, combos.length);
+  assert.ok(combos.includes("AHG/White / XS") && combos.includes("AHG/White (05203) / XS"));
+});
+
 test("plan: no valid exchange rate -> no new variants priced, existing prices untouched", () => {
   const n = normalizeAlo(style("W54234R"), details, settings);
   const none = { ok: false, rate: null, base: "USD", quote: "INR", provider: null, providerUpdatedAt: null, fetchedAt: null, origin: "none" as const };

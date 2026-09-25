@@ -183,16 +183,28 @@ export function buildAloPlan(p: APlanInput): APlan {
   if (deferred) notes.push(`${deferred} new variant(s) not added until a valid price exists`);
 
   // variants already in Shopify but no longer listed by ALO: kept (never deleted); ours become unorderable
+  // A kept variant whose colour/size equals a current one (ALO re-used the colour name for a new colourway) gets its
+  // own ALO colour code as a suffix, so Shopify never sees two variants with identical options.
   let dropped = 0;
   let manual = 0;
+  let renamed = 0;
+  const liveCombos = new Set(variants.map((v) => comboKey((v.optionValues as { optionName: string; name: string }[]).map((o) => ({ name: o.optionName, value: o.name })))));
   for (const ev of e?.variants.nodes ?? []) {
     if (used.has(ev.id)) continue;
     const sku = (ev.sku ?? "").toUpperCase();
     const ours = writtenBefore[sku] != null || skuBelongsTo(sku, n.styleId);
-    const keep: Record<string, unknown> = { id: ev.id, optionValues: ev.selectedOptions.map((o) => ({ optionName: o.name, name: o.value })) };
+    let opts = ev.selectedOptions.map((o) => ({ optionName: o.name, name: o.value }));
+    if (liveCombos.has(comboKey(ev.selectedOptions)) && opts.some((o) => o.optionName === "Color")) {
+      const code = (skuBelongsTo(sku, n.styleId) ? sku.slice(n.styleId.length, -1) : "") || ev.id.split("/").pop()!.slice(-4);
+      opts = opts.map((o) => (o.optionName === "Color" ? { ...o, name: `${o.name.replace(/ \([^)]*\)$/, "")} (${code})` } : o));
+      renamed++;
+    }
+    liveCombos.add(comboKey(opts.map((o) => ({ name: o.optionName, value: o.name }))));
+    const keep: Record<string, unknown> = { id: ev.id, optionValues: opts };
     if (ours) { keep.inventoryPolicy = "DENY"; dropped++; } else manual++;
     variants.push(keep);
   }
+  if (renamed) notes.push(`${renamed} discontinued variant(s) shared a current colour name - suffixed with their ALO colour code`);
   if (dropped) notes.push(`${dropped} variant(s) no longer listed by ALO - kept as unavailable`);
   if (manual) notes.push(`kept ${manual} manually added variant(s) untouched`);
   const defaultTitle = variants.filter((v) => (v.optionValues as { optionName: string }[]).some((o) => o.optionName === "Title"));
