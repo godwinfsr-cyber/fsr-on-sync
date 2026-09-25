@@ -129,8 +129,18 @@ export function buildAloPlan(p: APlanInput): APlan {
   let pricesPaused = false;
   let preserved = 0;
   let priceMoves = 0;
+  // ALO sometimes re-codes a size (new SKU, same colour + size): the existing Shopify variant takes the new SKU
+  // instead of a second variant with identical options, which Shopify rejects
+  const comboKey = (opts: { name: string; value: string }[]) => opts.map((o) => `${o.name}=${o.value}`).sort().join("|");
+  const newSkus = new Set(n.variants.map((v) => v.sku));
+  const evByCombo = new Map((e?.variants.nodes ?? []).filter((v) => !newSkus.has((v.sku ?? "").toUpperCase())).map((v) => [comboKey(v.selectedOptions), v]));
+  let recoded = 0;
   for (const nv of n.variants) {
-    const ev = evBySku.get(nv.sku);
+    let ev = evBySku.get(nv.sku);
+    if (!ev) {
+      const same = evByCombo.get(comboKey(optionValuesOf(n, nv).map((o) => ({ name: o.optionName, value: o.name }))));
+      if (same && !used.has(same.id)) { ev = same; recoded++; }
+    }
     if (ev) used.add(ev.id);
     const price = prices.get(nv.sku);
     let vPrice: string | null;
@@ -166,6 +176,7 @@ export function buildAloPlan(p: APlanInput): APlan {
     else if (p.locationId) v.inventoryQuantities = [{ locationId: p.locationId, name: "available", quantity: 0 }];
     variants.push(v);
   }
+  if (recoded) notes.push(`${recoded} variant(s) re-coded by ALO (new SKU, same colour/size) - existing variant updated`);
   if (preserved) notes.push(`${preserved} selling price(s) edited in Shopify - preserved until ALO's USD price changes`);
   if (priceMoves) notes.push(`${priceMoves} variant price(s) recalculated`);
   if (pricesPaused) notes.push(`PRICE UPDATES PAUSED: ${[...prices.values()].find((x) => !x.ok)?.reason ?? "no valid price"} - existing prices left unchanged`);

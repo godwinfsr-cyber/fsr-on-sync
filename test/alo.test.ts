@@ -306,6 +306,18 @@ test("plan: OUT_OF_STOCK_STATUS=ARCHIVED archives sold-out styles and restores o
   assert.equal(buildAloPlan({ n: back, existing: draft, row: { shopify_status: "DRAFT" } as never, settings: arch, prices: pricesFor(back, fx85, arch), fx: fx85, images: [], locationId: null, nowIso: "x" }).input.status, "ACTIVE");
 });
 
+test("plan: ALO re-codes a size (new SKU, same colour/size) -> existing variant takes the new SKU, no duplicate", () => {
+  const n = normalizeAlo(style("W54234R"), details, settings);
+  const prices = pricesFor(n, fx85, settings);
+  const existing = asShopify(buildAloPlan({ n, existing: null, row: undefined, settings, prices, fx: fx85, images: [], locationId: null, nowIso: "x" }).input);
+  existing.variants.nodes[0].sku = "W54234R99990"; // what ALO used to call Black / XXS
+  const plan = buildAloPlan({ n, existing, row: { written_prices: "{}" } as never, settings, prices, fx: fx85, images: [], locationId: null, nowIso: "x" });
+  const vs = plan.input.variants as Record<string, unknown>[];
+  assert.equal(vs.length, 6);
+  assert.equal(vs.find((v) => v.id === existing.variants.nodes[0].id)!.sku, "W54234R01000");
+  assert.ok(plan.notes.some((x) => /re-coded/.test(x)));
+});
+
 test("plan: no valid exchange rate -> no new variants priced, existing prices untouched", () => {
   const n = normalizeAlo(style("W54234R"), details, settings);
   const none = { ok: false, rate: null, base: "USD", quote: "INR", provider: null, providerUpdatedAt: null, fetchedAt: null, origin: "none" as const };
