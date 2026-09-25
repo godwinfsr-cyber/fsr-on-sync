@@ -247,13 +247,31 @@ export function normalizeAlo(g: StyleGroup, details: StyleDetails, s: NormSettin
   const seenSku = new Set<string>();
   const colours: NormalizedColour[] = [];
   const variants: NormalizedVariant[] = [];
-  const usedColour = new Map<string, number>();
   const lengths = new Set<string>();
   let dupes = 0;
   let noSku = 0;
   let hasColour = false;
   let hasSize = false;
   const colourImages: { colour: string; listing: AloRawProduct }[] = [];
+  // Colour names shared by several contributing colourways are ALL suffixed with ALO's colour code, so a name
+  // never depends on ALO's listing order (an order change would otherwise swap names and collide in Shopify).
+  const baseOf = (p: AloRawProduct) => {
+    const cPos = optionIndex(p, "color", "colour");
+    const first = p.variants.find((v) => v.sku);
+    return ((first && cPos ? opt(first, cPos) : null) ?? p.title.split(" - ").slice(1).join(" - ").trim()) || "Default";
+  };
+  const shared = new Map<string, number>();
+  {
+    const seen = new Set<string>();
+    for (const p of g.listings) {
+      const skus = p.variants.map((v) => (v.sku ?? "").trim().toUpperCase()).filter((k) => k && !seen.has(k) && !g.foreignSkus?.has(k));
+      if (!skus.length) continue;
+      skus.forEach((k) => seen.add(k));
+      const b = baseOf(p).toLowerCase();
+      shared.set(b, (shared.get(b) ?? 0) + 1);
+    }
+  }
+  const usedNames = new Set<string>();
   for (const p of g.listings) {
     const cPos = optionIndex(p, "color", "colour");
     const sPos = optionIndex(p, "size");
@@ -267,15 +285,13 @@ export function normalizeAlo(g: StyleGroup, details: StyleDetails, s: NormSettin
       return true;
     });
     if (!fresh.length) continue;
-    const rawColour = (cPos ? opt(fresh[0], cPos) : null) ?? p.title.split(" - ").slice(1).join(" - ").trim() ?? "";
-    const baseColour = rawColour || "Default";
+    const baseColour = baseOf(p);
     const length = lPos ? opt(fresh[0], lPos) : null;
     if (length) lengths.add(length);
-    // two colourways with one display name would collide as option values: disambiguate (length, then colour code)
-    const n = (usedColour.get(baseColour.toLowerCase()) ?? 0) + 1;
-    usedColour.set(baseColour.toLowerCase(), n);
-    const code = (fresh[0].sku ?? "").toUpperCase().slice(g.styleId.length, -1);
-    const colour = n > 1 ? `${baseColour} (${length && !colours.some((c) => c.colour === `${baseColour} (${length})`) ? length : code || n})` : baseColour;
+    const code = (p.variants.find((v) => v.sku)?.sku ?? "").trim().toUpperCase().slice(g.styleId.length, -1);
+    let colour = (shared.get(baseColour.toLowerCase()) ?? 0) > 1 ? `${baseColour} (${code || String(p.id).slice(-4)})` : baseColour;
+    if (usedNames.has(colour.toLowerCase())) colour = `${baseColour} (${String(p.id).slice(-4)})`;
+    usedNames.add(colour.toLowerCase());
     const vs: NormalizedVariant[] = fresh.map((v) => {
       const sku = v.sku!.trim().toUpperCase();
       seenSku.add(sku);

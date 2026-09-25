@@ -318,6 +318,16 @@ test("plan: ALO re-codes a size (new SKU, same colour/size) -> existing variant 
   assert.ok(plan.notes.some((x) => /re-coded/.test(x)));
 });
 
+test("normalize: colourways sharing a name get stable colour-code suffixes, whatever ALO's order", () => {
+  const a = listing({ id: 40, handle: "w6491r-skirt-ahg-white", title: "Skirt - Athletic Heather Grey/White", type: "Women:Bottoms:Skirts", style: "W6491R", colour: "Athletic Heather Grey/White", code: "05203", sizes: ["XS", "S"], price: "98.00" });
+  const b = listing({ id: 41, handle: "w6491r-skirt-ahg-white-2", title: "Skirt - Athletic Heather Grey/White", type: "Women:Bottoms:Skirts", style: "W6491R", colour: "Athletic Heather Grey/White", code: "08811", sizes: ["XS", "S"], price: "98.00" });
+  const names = (ls: AloRawProduct[]) => Object.fromEntries(normalizeAlo(groupAloCatalog(ls, settings).styles[0], { barcodes: {}, attribs: null }, settings).variants.map((v) => [v.sku, v.colour]));
+  const ab = names([a, b]);
+  assert.deepEqual(ab, names([b, a]));
+  assert.equal(ab.W6491R052030, "Athletic Heather Grey/White (05203)");
+  assert.equal(ab.W6491R088110, "Athletic Heather Grey/White (08811)");
+});
+
 test("plan: no valid exchange rate -> no new variants priced, existing prices untouched", () => {
   const n = normalizeAlo(style("W54234R"), details, settings);
   const none = { ok: false, rate: null, base: "USD", quote: "INR", provider: null, providerUpdatedAt: null, fetchedAt: null, origin: "none" as const };
