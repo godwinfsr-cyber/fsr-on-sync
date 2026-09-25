@@ -5,26 +5,32 @@ on:
     branches: [main]
     paths: [.github/workflows/coach-probe.yml]
 
+permissions:
+  contents: write
+
 jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
       - name: Fetch a few coach.com product pages (honest UA, 3 s apart)
         run: |
           UA="Mozilla/5.0 (compatible; FullSizeRunCatalogSync/1.0; +https://fullsizerun.in; authorized-importer)"
-          fail=0
+          out=logs/coach-probe.txt; mkdir -p logs; date -u > $out
           for u in \
+            https://www.coach.com/sitemap_0-product.xml \
             https://www.coach.com/products/platform-sneaker-in-signature-denim/CDE37.html \
             https://www.coach.com/products/teri-shoulder-bag-in-signature-canvas/CV933-IMXAQ.html \
             https://www.coach.com/products/outlet/zip-card-case/6303.html \
             https://www.coach.com/products/trigger-snap-bag-charm/39865.html \
+            https://www.coach.com/products/tabby-shoulder-bag-26/CM546.html \
             https://www.coach.com/shop/outlet ; do
             code=$(curl -s -o page.html -w "%{http_code}" --max-time 30 -A "$UA" "$u")
             ld=$(grep -c 'ProductGroup' page.html || true)
             va=$(grep -c 'variationAttributes' page.html || true)
-            echo "$code ldProductGroup=$ld variationAttributes=$va bytes=$(wc -c < page.html) $u"
-            [ "$code" = "200" ] || fail=1
+            echo "$code ldProductGroup=$ld variationAttributes=$va bytes=$(wc -c < page.html) $u" | tee -a $out
             sleep 3
           done
-          exit $fail
+          git config user.name fsr-coach-probe; git config user.email actions@users.noreply.github.com
+          git add -f $out; git commit -qm "coach probe result [skip ci]"; git pull -q --rebase; git push -q
