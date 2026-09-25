@@ -1,8 +1,0 @@
-Fri Sep 25 21:17:46 UTC 2026
-200 ldProductGroup=0 variationAttributes=0 bytes=650668 https://www.coach.com/sitemap_0-product.xml
-403 ldProductGroup=0 variationAttributes=0 bytes=448 https://www.coach.com/products/platform-sneaker-in-signature-denim/CDE37.html
-403 ldProductGroup=0 variationAttributes=0 bytes=464 https://www.coach.com/products/teri-shoulder-bag-in-signature-canvas/CV933-IMXAQ.html
-403 ldProductGroup=0 variationAttributes=0 bytes=430 https://www.coach.com/products/outlet/zip-card-case/6303.html
-403 ldProductGroup=0 variationAttributes=0 bytes=431 https://www.coach.com/products/trigger-snap-bag-charm/39865.html
-403 ldProductGroup=0 variationAttributes=0 bytes=430 https://www.coach.com/products/tabby-shoulder-bag-26/CM546.html
-403 ldProductGroup=0 variationAttributes=0 bytes=380 https://www.coach.com/shop/outlet
