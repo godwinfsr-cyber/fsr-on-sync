@@ -1,0 +1,91 @@
+name: ALO Yoga -> Full Size Run sync
+
+on:
+  schedule:
+    - cron: "50 */5 * * *"   # every 5 hours (UTC), offset from ON.com (:00), Gymshark (:15), Rhode (:30), Stanley (:45). GitHub may start a few minutes late.
+  push:
+    branches: [main]
+    paths: [.github/workflows/alo-sync.yml, src/alo/**, test/alo.test.ts]   # changed sync code runs once straight away
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "live or dry-run"
+        default: live
+        type: choice
+        options: [live, dry-run]
+
+permissions:
+  contents: write            # commit the updated ALO sync database back to the repo
+
+concurrency:
+  group: alo-sync
+  cancel-in-progress: false  # never run two ALO syncs at once; queue instead
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300     # first full import ~2-3 h; later runs re-read details only weekly, ~20-40 min
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # ALO settings (same as .env; `node src/alo/cli.ts set` overrides stored in the database win)
+      ALO_AUTHORIZATION_CONFIRMED: "true"   # FSR is an authorised ALO Yoga importer (confirmed by the store owner 2026-09-26)
+      ALO_DRY_RUN: "false"
+      ALO_TEST_MODE: "false"
+      ALO_FULL_SYNC: "true"
+      ALO_SYNC_INTERVAL_HOURS: "5"
+      ALO_DEFAULT_ETA: "15–20 Days"
+      ALO_FLAT_ADJUSTMENT_INR: "3000"
+      ALO_SOURCE_PRICE_BASIS: CURRENT_SELLING
+      ALO_COMPARE_AT_MODE: SOURCE_REGULAR
+      ALO_FX_PROVIDER: open.er-api.com
+      ALO_MAX_EXCHANGE_RATE_AGE_HOURS: "24"
+      ALO_PRICE_ROUNDING_MODE: NONE
+      ALO_NEW_PRODUCT_STATUS: ACTIVE
+      ALO_OUT_OF_STOCK_STATUS: ARCHIVED     # fully sold out at ALO -> archived, restored when back (owner 2026-09-26)
+      ALO_MISSING_ACTION: archive
+      ALO_MAX_CONCURRENT_PRODUCTS: "3"
+      ALO_REQUEST_DELAY_MS: "1500"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/alo.test.ts
+
+      - name: Run ALO sync
+        run: |
+          mkdir -p logs
+          node src/alo/cli.ts unlock
+          if [ "${{ github.event.inputs.mode }}" = "dry-run" ]; then
+            node src/alo/cli.ts sync --dry-run --trigger manual
+          else
+            node src/alo/cli.ts sync --live --trigger scheduler
+          fi
+
+      - name: Save ALO database
+        if: always()
+        run: |
+          node src/alo/cli.ts checkpoint
+          git config user.name "fsr-alo-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/alo-sync.sqlite
+          git diff --cached --quiet && exit 0
+          git commit -m "alo sync: update database [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 10; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo-sync-report-${{ github.run_number }}
+          path: logs/ALO-SYNC-*.report.*
+          retention-days: 30
