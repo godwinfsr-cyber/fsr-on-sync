@@ -1,0 +1,26 @@
+{
+  "name": "on-sync",
+  "version": "1.0.0",
+  "description": "ON.com US Last Season Shoes -> Full Size Run Shopify synchronizer",
+  "scripts": {
+    "sync": "node src/cli.ts sync",
+    "sync:dry": "node src/cli.ts sync --dry-run",
+    "tick": "node src/cli.ts tick",
+    "status": "node src/cli.ts status",
+    "dashboard": "node src/dashboard/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.ts"
+  },
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "playwright": "^1.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
