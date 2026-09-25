@@ -5,7 +5,7 @@ on:
     - cron: "15 */5 * * *"   # every 5 hours (UTC), offset from the ON.com (:00) and Rhode (:30) syncs. GitHub may start a few minutes late.
   push:
     branches: [main]
-    paths: [.github/workflows/gymshark-sync.yml]   # a changed workflow runs once straight away
+    paths: [.github/workflows/gymshark-sync.yml, src/gymshark/**, test/gymshark.test.ts]   # changed sync code runs once straight away
   workflow_dispatch:
     inputs:
       mode:
