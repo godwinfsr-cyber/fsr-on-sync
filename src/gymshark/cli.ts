@@ -65,7 +65,7 @@ async function main() {
     }
     case "settings": console.log(JSON.stringify(getGymsharkSettings(), null, 2)); break;
     case "unlock": releaseGLock(); console.log("lock cleared"); break;
-    case "checkpoint": gdb.exec("PRAGMA wal_checkpoint(TRUNCATE)"); console.log("database checkpointed"); break;
+    case "checkpoint": gdb.exec("PRAGMA wal_checkpoint(TRUNCATE); VACUUM; PRAGMA wal_checkpoint(TRUNCATE)"); console.log("database checkpointed + compacted"); break;
     case "runs": console.table(gdb.prepare("SELECT id, mode, trigger, status, started_at, duration_ms FROM sync_runs ORDER BY started_at DESC LIMIT 20").all()); break;
     case "prices": console.table(gdb.prepare("SELECT * FROM price_history ORDER BY changed_at DESC LIMIT 50").all()); break;
     default:

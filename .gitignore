@@ -4,3 +4,4 @@ logs/
 data/*
 !data/on-sync.sqlite
 !data/rhode-sync.sqlite
+!data/gymshark-sync.sqlite

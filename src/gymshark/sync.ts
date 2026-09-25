@@ -216,6 +216,7 @@ export async function runGymsharkSync(opts: GSyncOptions = {}): Promise<GSyncSum
     fs.writeFileSync(path.join(LOG_DIR, `${syncId}.report.json`), JSON.stringify(s, null, 2));
     fs.writeFileSync(path.join(LOG_DIR, `${syncId}.report.txt`), formatGymsharkReport(s));
     log.info("complete", `sync ${s.status} in ${Math.round(s.durationMs / 1000)}s`, rest.counts as unknown as Record<string, unknown>);
+    gdb.prepare("DELETE FROM sync_events WHERE ts < ?").run(new Date(Date.now() - 14 * 86400_000).toISOString()); // keep the DB small
     releaseGLock();
   }
   return s;
@@ -376,7 +377,8 @@ async function processStyle(n: NormalizedStyle, ctx: Ctx): Promise<GProductRepor
     written_eta: plan.written.eta,
     written_prices: JSON.stringify(plan.written.prices),
     error_message: null,
-    snapshot_json: JSON.stringify({ ...n, colours: n.colours.map((c) => ({ ...c, fsrPrice: prices.get(c.colour)?.fsrPrice ?? null })) }),
+    // compact: only what later runs read back (price history + removal checks); the DB is committed by CI every run
+    snapshot_json: JSON.stringify({ colours: n.colours.map((c) => ({ colour: c.colour, handle: c.handle, currentUsd: c.currentUsd, regularUsd: c.regularUsd, fsrPrice: prices.get(c.colour)?.fsrPrice ?? null })) }),
   });
   return rep;
 }

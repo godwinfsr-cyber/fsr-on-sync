@@ -1,0 +1,85 @@
+name: Gymshark -> Full Size Run sync
+
+on:
+  schedule:
+    - cron: "15 */5 * * *"   # every 5 hours (UTC), offset from the ON.com (:00) and Rhode (:30) syncs. GitHub may start a few minutes late.
+  push:
+    branches: [main]
+    paths: [.github/workflows/gymshark-sync.yml]   # a changed workflow runs once straight away
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "live or dry-run"
+        default: live
+        type: choice
+        options: [live, dry-run]
+
+permissions:
+  contents: write            # commit the updated Gymshark sync database back to the repo
+
+concurrency:
+  group: gymshark-sync
+  cancel-in-progress: false  # never run two Gymshark syncs at once; queue instead
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240     # a full crawl of ~760 styles takes 40-90 min
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # Gymshark settings (same as .env; `node src/gymshark/cli.ts set` overrides stored in the database win)
+      GYMSHARK_DRY_RUN: "false"
+      GYMSHARK_SYNC_INTERVAL_HOURS: "5"
+      GYMSHARK_DEFAULT_ETA: "15–20 Days"
+      GYMSHARK_FX_PROVIDER: open.er-api.com
+      GYMSHARK_MAX_EXCHANGE_RATE_AGE_HOURS: "24"
+      GYMSHARK_WEIGHT_SURCHARGE_FALLBACK_INR: "2000"
+      GYMSHARK_WEIGHT_BANDS: "0.5:1000,1:1500,2:2000,3:2500,+:3000"
+      GYMSHARK_FSR_PROFIT_INR: "1500"
+      GYMSHARK_PRICE_ROUNDING_MODE: NONE
+      GYMSHARK_NEW_PRODUCT_STATUS: ACTIVE
+      GYMSHARK_CONTENT_REUSE_CONFIRMED: "true"   # FSR is an authorised Gymshark importer (confirmed by the store owner 2026-09-26)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/gymshark.test.ts
+
+      - name: Run Gymshark sync
+        run: |
+          mkdir -p logs
+          node src/gymshark/cli.ts unlock
+          if [ "${{ github.event.inputs.mode }}" = "dry-run" ]; then
+            node src/gymshark/cli.ts sync --dry-run --trigger manual
+          else
+            node src/gymshark/cli.ts sync --live --trigger scheduler
+          fi
+
+      - name: Save Gymshark database
+        if: always()
+        run: |
+          node src/gymshark/cli.ts checkpoint
+          git config user.name "fsr-gymshark-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/gymshark-sync.sqlite
+          git diff --cached --quiet && exit 0
+          git commit -m "gymshark sync: update database [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 10; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gymshark-sync-report-${{ github.run_number }}
+          path: logs/GYMSHARK-SYNC-*.report.*
+          retention-days: 30
