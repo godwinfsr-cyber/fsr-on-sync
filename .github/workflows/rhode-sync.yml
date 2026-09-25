@@ -1,0 +1,82 @@
+name: Rhode -> Full Size Run sync
+
+on:
+  schedule:
+    - cron: "30 */5 * * *"  # every 5 hours (UTC), offset from the ON.com sync. GitHub may start a few minutes late.
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "live or dry-run"
+        default: live
+        type: choice
+        options: [live, dry-run]
+
+permissions:
+  contents: write            # commit the updated Rhode sync database back to the repo
+
+concurrency:
+  group: rhode-sync
+  cancel-in-progress: false  # never run two Rhode syncs at once; queue instead
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # Rhode admin settings (same as .env; `node src/rhode/cli.ts set` overrides are stored in the database)
+      RHODE_ENABLED: "true"
+      RHODE_SYNC_INTERVAL_HOURS: "5"
+      RHODE_PRICING_ADJUSTMENT_INR: "2000"
+      RHODE_ETA: "15–20 Days"
+      USD_INR_RATE_MAX_AGE_HOURS: "24"
+      RHODE_DRY_RUN: "false"
+      RHODE_PRICE_ROUNDING_MODE: NONE
+      RHODE_COMPARE_AT_MODE: NONE
+      RHODE_NEW_PRODUCT_STATUS: ACTIVE
+      RHODE_CONTENT_REUSE_CONFIRMED: "true"   # confirmed by the store owner 2026-09-26
+      RHODE_GROUP_SHADES: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/rhode.test.ts
+
+      - name: Run Rhode sync
+        run: |
+          mkdir -p logs
+          node src/rhode/cli.ts unlock
+          if [ "${{ github.event.inputs.mode }}" = "dry-run" ]; then
+            node src/rhode/cli.ts sync --dry-run --trigger manual
+          else
+            node src/rhode/cli.ts scheduled
+          fi
+
+      - name: Save Rhode database
+        if: always()
+        run: |
+          node src/rhode/cli.ts checkpoint
+          git config user.name "fsr-rhode-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/rhode-sync.sqlite
+          git diff --cached --quiet && exit 0
+          git commit -m "rhode sync: update database [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 10; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rhode-sync-report-${{ github.run_number }}
+          path: logs/RHODE-SYNC-*.report.*
+          retention-days: 30

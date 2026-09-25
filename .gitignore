@@ -3,3 +3,4 @@ node_modules/
 logs/
 data/*
 !data/on-sync.sqlite
+!data/rhode-sync.sqlite

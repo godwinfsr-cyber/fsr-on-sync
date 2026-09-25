@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { LOG_DIR } from "./config.ts";
-import { db } from "./db.ts";
+import type { DatabaseSync } from "node:sqlite";
+import { db as onDb } from "./db.ts";
 
 type Level = "debug" | "info" | "warn" | "error";
 
@@ -23,9 +24,12 @@ export function redact(s: string): string {
 export class Logger {
   syncId: string | null;
   private file: string;
-  constructor(syncId: string | null) {
+  private db: DatabaseSync;
+  // `db`/`name` let other sources (e.g. Tissot) log into their own database and file
+  constructor(syncId: string | null, opts: { db?: DatabaseSync; name?: string } = {}) {
     this.syncId = syncId;
-    this.file = path.join(LOG_DIR, `${syncId ?? "on-sync"}.jsonl`);
+    this.db = opts.db ?? onDb;
+    this.file = path.join(LOG_DIR, `${syncId ?? opts.name ?? "on-sync"}.jsonl`);
   }
   log(level: Level, stage: string, message: string, data?: Record<string, unknown>, sourceProductId?: string) {
     const ts = new Date().toISOString();
@@ -37,7 +41,7 @@ export class Logger {
       process.stderr.write(redact(`${ts.slice(11, 19)} ${tag} [${stage}] ${sourceProductId ? sourceProductId + " " : ""}${message}`) + "\n");
     }
     if (this.syncId && level !== "debug") {
-      db.prepare("INSERT INTO sync_events (sync_id, ts, level, stage, source_product_id, message, data_json) VALUES (?,?,?,?,?,?,?)")
+      this.db.prepare("INSERT INTO sync_events (sync_id, ts, level, stage, source_product_id, message, data_json) VALUES (?,?,?,?,?,?,?)")
         .run(this.syncId, ts, level, stage, sourceProductId ?? null, redact(message), data ? redact(JSON.stringify(data)) : null);
     }
   }
