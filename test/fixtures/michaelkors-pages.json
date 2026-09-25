@@ -1,0 +1,147 @@
+[
+  {
+    "_note": "real: michaelkors.com JSON-LD captured 2026-09-26 (reviews/ratings/shipping blocks removed, variants trimmed)",
+    "url": "https://www.michaelkors.com/kasia-leather-boot/40R5KAHE6L.html",
+    "canonical": "https://www.michaelkors.com/kasia-leather-boot/40R5KAHE6L.html",
+    "ld": [
+      {"@type": "BreadcrumbList", "itemListElement": [{"position": 1, "name": "Women", "item": "https://www.michaelkors.com/women/"}, {"position": 2, "name": "Shoes", "item": "https://www.michaelkors.com/women/shoes/"}, {"position": 3, "name": "Boots", "item": "https://www.michaelkors.com/women/shoes/boots/"}, {"position": 4, "name": "Kasia Leather Boot", "item": "https://www.michaelkors.com/kasia-leather-boot/40R5KAHE6L.html"}]},
+      {"@context": "http://schema.org", "@type": "ProductGroup", "@id": "https://www.michaelkors.com/kasia-leather-boot/40R5KAHE6L.html", "name": "Kasia Leather Boot", "brand": {"@type": "Brand", "name": "Michael Kors"}, "category": "Women > Shoes > Boots",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/1356b73b-0665-48ca-aad6-e2b7f21ae706/40R5KAHE6L-001-0001_1-tif", "https://assets.michaelkors.com/transform/ECOM_Image_Large/3815ab8b-827d-4a2a-929d-bb500de64d73/40R5KAHE6L-001-0001_2-tif", "https://assets.michaelkors.com/transform/ECOM_Image_Large/97bda3f1-52fb-41a1-a082-7197c60a2622/40R5KAHE6L-001-0001_3-tif"],
+        "description": " Boot Leather Lining polyurethane blend Sole rubber Point toe Zip fastening Heel height 35 Heel type galvanized Imported", "variesBy": ["https://schema.org/size"],
+        "hasVariant": [
+          {"@type": "Product", "@id": "https://www.michaelkors.com/kasia-leather-boot/810268129.html", "name": "Kasia Leather Boot", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/1356b73b-0665-48ca-aad6-e2b7f21ae706/40R5KAHE6L-001-0001_1-tif", "sku": "810268129", "color": "BLACK", "size": "5_dot_0", "offers": {"priceCurrency": "USD", "price": 169, "availability": "https://schema.org/OutOfStock"}},
+          {"@type": "Product", "@id": "https://www.michaelkors.com/kasia-leather-boot/810268130.html", "name": "Kasia Leather Boot", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/1356b73b-0665-48ca-aad6-e2b7f21ae706/40R5KAHE6L-001-0001_1-tif", "sku": "810268130", "color": "BLACK", "size": "5_dot_5", "offers": {"priceCurrency": "USD", "price": 169, "availability": "https://schema.org/OutOfStock"}},
+          {"@type": "Product", "@id": "https://www.michaelkors.com/kasia-leather-boot/810268131.html", "name": "Kasia Leather Boot", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/1356b73b-0665-48ca-aad6-e2b7f21ae706/40R5KAHE6L-001-0001_1-tif", "sku": "810268131", "color": "BLACK", "size": "6_dot_0", "offers": {"priceCurrency": "USD", "price": 169, "availability": "https://schema.org/InStock"}},
+          {"@type": "Product", "@id": "https://www.michaelkors.com/kasia-leather-boot/810268133.html", "name": "Kasia Leather Boot", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/1356b73b-0665-48ca-aad6-e2b7f21ae706/40R5KAHE6L-001-0001_1-tif", "sku": "810268133", "color": "BLACK", "size": "7_dot_0", "offers": {"priceCurrency": "USD", "price": 169, "availability": "https://schema.org/InStock"}}
+        ]}
+    ]
+  },
+  {
+    "_note": "real",
+    "url": "https://www.michaelkors.com/large-logo-continental-wallet/32F1GJ6E7B.html",
+    "canonical": "https://www.michaelkors.com/large-logo-continental-wallet/32F1GJ6E7B.html",
+    "ld": [
+      {"@type": "BreadcrumbList", "itemListElement": [{"position": 1, "name": "Women", "item": "https://www.michaelkors.com/women/"}, {"position": 2, "name": "Wallets", "item": "https://www.michaelkors.com/women/wallets/"}, {"position": 3, "name": "Large Logo Continental Wallet", "item": "https://www.michaelkors.com/large-logo-continental-wallet/490073659.html"}]},
+      {"@type": "ProductGroup", "@id": "https://www.michaelkors.com/large-logo-continental-wallet/32F1GJ6E7B.html", "name": "Large Logo Continental Wallet", "category": "Women > Wallets",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/b87a62c3-a631-4baa-9571-c95d684ce262/32F1GJ6E7B-200-0200_1-tif", "https://assets.michaelkors.com/transform/ECOM_Image_Large/c27050b9-806b-46e5-9a72-ff57d8246a06/32F1GJ6E7B-200-0200_2-tif"],
+        "description": " Wallet Logoprint canvas 69 coated canvas17 polyester13 cotton1 polyurethane Trim 100 polyurethane Goldtone hardware 825W X 4 H X 1D Interior details 17 card slots 5 slip pockets zip pouch phone pocket Lining 100 polyester Zip fastening Imported", "variesBy": ["https://schema.org/color"],
+        "hasVariant": [
+          {"@type": "Product", "@id": "https://www.michaelkors.com/large-logo-continental-wallet/490073658.html", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/709cf77b-ca88-47cc-b884-3ec3726e93bc/32F1GJ6E7B-150-0150_1-tif", "sku": "490073658", "color": "VANILLA", "size": "NS", "offers": {"priceCurrency": "USD", "price": 159.5, "availability": "https://schema.org/InStock"}},
+          {"@type": "Product", "@id": "https://www.michaelkors.com/large-logo-continental-wallet/490073659.html", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/b87a62c3-a631-4baa-9571-c95d684ce262/32F1GJ6E7B-200-0200_1-tif", "sku": "490073659", "color": "BROWN", "size": "NS", "offers": {"priceCurrency": "USD", "price": 159.5, "availability": "https://schema.org/InStock"}}
+        ]}
+    ]
+  },
+  {
+    "_note": "real (MK- style number, but sunglasses - must be imported)",
+    "url": "https://www.michaelkors.com/kona-sunglasses/MK-1089.html",
+    "canonical": "https://www.michaelkors.com/kona-sunglasses/MK-1089.html",
+    "ld": [
+      {"@type": "BreadcrumbList", "itemListElement": [{"position": 1, "name": "Women"}, {"position": 2, "name": "Accessories"}, {"position": 3, "name": "View All"}, {"position": 4, "name": "Kona Sunglasses"}]},
+      {"@type": "ProductGroup", "@id": "https://www.michaelkors.com/kona-sunglasses/MK-1089.html", "name": "Kona Sunglasses", "category": "Women > Accessories > View All",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/51e6c896-1e82-47ed-8366-334273258df7/MK-1089-0001-0001_1-tif"],
+        "description": " Aviator sunglasses Metal frame Case included 100 UV protection Imported", "variesBy": ["https://schema.org/color"],
+        "hasVariant": [
+          {"@type": "Product", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/51e6c896-1e82-47ed-8366-334273258df7/MK-1089-0001-0001_1-tif", "sku": "512536614", "color": "BLACK", "size": "NS", "offers": {"priceCurrency": "USD", "price": 179, "availability": "https://schema.org/OutOfStock"}},
+          {"@type": "Product", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/454852bf-92f2-4be2-95d8-32fac6cc7c9a/MK-1089-0040-0040_1-tif", "sku": "512537436", "color": "SILVER", "size": "NS", "offers": {"priceCurrency": "USD", "price": 179, "availability": "https://schema.org/InStock"}}
+        ]}
+    ]
+  },
+  {
+    "_note": "real (charity campaign name contains 'Watch' - it is a tote bag and must be imported)",
+    "url": "https://www.michaelkors.com/watch-hunger-stop-cotton-canvas-tote-bag/30H3GTVT7C.html",
+    "canonical": "https://www.michaelkors.com/watch-hunger-stop-cotton-canvas-tote-bag/30H3GTVT7C.html",
+    "ld": [
+      {"@type": "BreadcrumbList", "itemListElement": [{"position": 1, "name": "Women"}, {"position": 2, "name": "Handbags"}, {"position": 3, "name": "Totes"}, {"position": 4, "name": "Watch Hunger Stop Cotton Canvas Tote Bag"}]},
+      {"@type": "Product", "@id": "https://www.michaelkors.com/watch-hunger-stop-cotton-canvas-tote-bag/30H3GTVT7C.html", "name": "Watch Hunger Stop Cotton Canvas Tote Bag", "category": "Women > Handbags > Totes",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/0b5ca4af-4f19-4f6d-93b8-71cd0149633b/30H3GTVT7C-270-0121_1-tif", "https://assets.michaelkors.com/transform/ECOM_Image_Large/c519ea5b-6dcd-47ef-aeff-ee6fa9c6952b/30H3GTVT7C-270-0121_3-tif"],
+        "description": "Hunger Stop tote bag Cotton canvas 100 cotton 1525 W X 1475 H X 4 D Handle drop 115 Interior details back slip pocket ImportedDust bag not included",
+        "color": "NATURAL", "size": "NS", "sku": "30H3GTVT7C", "mpn": "30H3GTVT7C", "offers": [{"priceCurrency": "USD", "price": 98, "availability": "https://schema.org/InStock"}]}
+    ]
+  },
+  {
+    "_note": "real - watch (category Men > Watches)",
+    "url": "https://www.michaelkors.com/slim-runway-silver-tone-watch/MK3178.html",
+    "canonical": "https://www.michaelkors.com/slim-runway-silver-tone-watch/MK3178.html",
+    "ld": [
+      {"@type": "BreadcrumbList", "itemListElement": [{"position": 1, "name": "Men"}, {"position": 2, "name": "Watches"}, {"position": 3, "name": "Slim Runway Silver-Tone Watch"}]},
+      {"@type": "Product", "@id": "https://www.michaelkors.com/slim-runway-silver-tone-watch/MK3178.html", "name": "Slim Runway Silver-Tone Watch", "category": "Men > Watches",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/4b34e12e-8ea1-498c-9f7a-785dc95d8ee3/MK3178-0040-0040_1-tif"],
+        "description": " Stainless Steel SilverTone Hardware Oversized 42mm Case Quartz3Hand Movement Clasp Fastening   Water Resistant Up To 5 ATM 2Year Warranty  Imported",
+        "color": "SILVER", "size": "NS", "sku": "MK3178", "mpn": "MK3178", "offers": [{"priceCurrency": "USD", "price": 159, "availability": "https://schema.org/InStock"}]}
+    ]
+  },
+  {
+    "_note": "real - watch strap set listed under 'Outlet > Accessories' (watch component: must be excluded)",
+    "url": "https://www.michaelkors.com/petite-monroe-gold-tone-and-crocodile-embossed-leather-watch-strap-set/MKO9016SET.html",
+    "canonical": "https://www.michaelkors.com/petite-monroe-gold-tone-and-crocodile-embossed-leather-watch-strap-set/MKO9016SET.html",
+    "ld": [
+      {"@type": "BreadcrumbList", "itemListElement": [{"position": 1, "name": "Outlet"}, {"position": 2, "name": "Accessories"}, {"position": 3, "name": "Petite Monroe Gold-Tone and Crocodile-Embossed Leather Watch Strap Set"}]},
+      {"@type": "Product", "@id": "https://www.michaelkors.com/petite-monroe-gold-tone-and-crocodile-embossed-leather-watch-strap-set/MKO9016SET.html", "name": "Petite Monroe Gold-Tone and Crocodile-Embossed Leather Watch Strap Set", "category": "Outlet > Accessories",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/4f297314-26ec-4cc8-86ce-5a34fba03042/MKO9016SET-0001-0001_1-tif"],
+        "description": " Watch and strap set Stainless steel Goldtone hardware Petite 20mm case Quartz3hand movement Buckle and clasp fastenings Water resistant up to 5 ATM 2year warranty Imported",
+        "color": "BLACK", "size": "NS", "sku": "MKO9016SET", "offers": [{"priceCurrency": "USD", "price": 172.5, "availability": "https://schema.org/OutOfStock"}]}
+    ]
+  },
+  {
+    "_note": "SYNTHETIC test case (same schema as the site): smartwatch filed under a non-watch category, generic URL",
+    "url": "https://www.michaelkors.com/gen-6-bradshaw-pave-gold-tone-smartwatch/MKT5136.html",
+    "canonical": null,
+    "ld": [
+      {"@type": "Product", "@id": "https://www.michaelkors.com/gen-6-bradshaw-pave-gold-tone-smartwatch/MKT5136.html", "name": "Gen 6 Bradshaw Pavé Gold-Tone Smartwatch", "category": "Women > Accessories",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/00000000-0000-0000-0000-000000000000/MKT5136-0710-0710_1-tif"],
+        "description": "Wear OS by Google Heart rate tracking 44mm case", "color": "GOLD", "size": "NS", "sku": "MKT5136", "offers": [{"priceCurrency": "USD", "price": 395, "availability": "https://schema.org/InStock"}]}
+    ]
+  },
+  {
+    "_note": "SYNTHETIC test case: handbag whose marketing copy mentions a watch (must be imported)",
+    "url": "https://www.michaelkors.com/jet-set-medium-logo-shoulder-bag/30T0GTTS6B.html",
+    "canonical": "https://www.michaelkors.com/jet-set-medium-logo-shoulder-bag/30T0GTTS6B.html",
+    "ld": [
+      {"@type": "ProductGroup", "@id": "https://www.michaelkors.com/jet-set-medium-logo-shoulder-bag/30T0GTTS6B.html", "name": "Jet Set Medium Logo Shoulder Bag", "category": "Women > Handbags > Shoulder Bags",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/11111111-1111-1111-1111-111111111111/30T0GTTS6B-200-0200_1-tif"],
+        "description": "Style it with your favourite watch and a silk scarf. Logo-print canvas Gold-tone hardware Zip fastening Imported",
+        "hasVariant": [
+          {"@type": "Product", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/11111111-1111-1111-1111-111111111111/30T0GTTS6B-200-0200_1-tif", "sku": "401111111", "color": "BROWN", "size": "NS", "offers": {"priceCurrency": "USD", "price": 298, "availability": "https://schema.org/InStock"}},
+          {"@type": "Product", "image": "https://assets.michaelkors.com/transform/ECOM_Image_Large/22222222-2222-2222-2222-222222222222/30T0GTTS6B-001-0001_1-tif", "sku": "401111112", "color": "BLACK", "size": "NS", "offers": {"priceCurrency": "USD", "price": 298, "availability": "https://schema.org/InStock"}}
+        ]}
+    ]
+  },
+  {
+    "_note": "SYNTHETIC test case: men's sneaker (US -> UK: US - 0.5)",
+    "url": "https://www.michaelkors.com/keating-leather-sneaker/42F9KEFS1L.html",
+    "canonical": "https://www.michaelkors.com/keating-leather-sneaker/42F9KEFS1L.html",
+    "ld": [
+      {"@type": "ProductGroup", "@id": "https://www.michaelkors.com/keating-leather-sneaker/42F9KEFS1L.html", "name": "Keating Leather Sneaker", "category": "Men > Shoes > Sneakers",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/33333333-3333-3333-3333-333333333333/42F9KEFS1L-085-0085_1-tif"],
+        "description": "Sneaker Leather Rubber sole Lace-up fastening Imported",
+        "hasVariant": [
+          {"@type": "Product", "sku": "700000001", "color": "OPTIC WHITE", "size": "9_dot_0", "offers": {"priceCurrency": "USD", "price": 158, "availability": "https://schema.org/InStock"}},
+          {"@type": "Product", "sku": "700000002", "color": "OPTIC WHITE", "size": "10_dot_5", "offers": {"priceCurrency": "USD", "price": 158, "availability": "https://schema.org/InStock"}}
+        ]}
+    ]
+  },
+  {
+    "_note": "SYNTHETIC test case: clothing (outlet)",
+    "url": "https://www.michaelkors.com/leather-moto-jacket/MC57748.html",
+    "canonical": "https://www.michaelkors.com/leather-moto-jacket/MC57748.html",
+    "ld": [
+      {"@type": "ProductGroup", "@id": "https://www.michaelkors.com/leather-moto-jacket/MC57748.html", "name": "Leather Moto Jacket", "category": "Outlet > Men > Men's Clothing",
+        "image": ["https://assets.michaelkors.com/transform/ECOM_Image_Large/ffa84b0b-8af2-4e19-b704-a488f6d2458b/MC57748-001-0001_1-tif"],
+        "description": " 100 Leather  Lining 100 Polyester  Zip Fastening  Dry Clean By Leather Professional  Imported",
+        "hasVariant": [
+          {"@type": "Product", "sku": "366187959", "color": "BLACK", "size": "XS", "offers": {"priceCurrency": "USD", "price": 299, "availability": "https://schema.org/InStock"}},
+          {"@type": "Product", "sku": "366187960", "color": "BLACK", "size": "M", "offers": {"priceCurrency": "USD", "price": 299, "availability": "https://schema.org/OutOfStock"}},
+          {"@type": "Product", "sku": "366187970", "color": "MIDNIGHT", "size": "M", "offers": {"priceCurrency": "USD", "price": 279, "availability": "https://schema.org/InStock"}}
+        ]}
+    ]
+  },
+  {
+    "_note": "SYNTHETIC test case: watch charm (watch component)",
+    "url": "https://www.michaelkors.com/logo-watch-charm/MKC1234.html",
+    "canonical": null,
+    "ld": [
+      {"@type": "Product", "@id": "https://www.michaelkors.com/logo-watch-charm/MKC1234.html", "name": "Logo Watch Charm", "category": "Women > Accessories",
+        "image": [], "description": "Charm for watch bracelets", "color": "GOLD", "size": "NS", "sku": "MKC1234", "offers": [{"priceCurrency": "USD", "price": 45, "availability": "https://schema.org/InStock"}]}
+    ]
+  }
+]

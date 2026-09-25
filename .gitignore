@@ -6,3 +6,4 @@ data/*
 !data/rhode-sync.sqlite
 !data/gymshark-sync.sqlite
 !data/stanley-sync.sqlite
+!data/michaelkors-sync.sqlite

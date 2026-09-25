@@ -1,0 +1,88 @@
+name: Michael Kors -> Full Size Run sync
+
+on:
+  schedule:
+    - cron: "50 */5 * * *"   # every 5 hours (UTC), offset from ON.com (:00), Gymshark (:15), Rhode (:30), Stanley (:45). GitHub may start a few minutes late.
+  push:
+    branches: [main]
+    paths: [.github/workflows/michaelkors-sync.yml, src/michaelkors/**, test/michaelkors.test.ts]   # changed sync code: a 3-product DRY RUN only
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "live or dry-run"
+        default: live
+        type: choice
+        options: [live, dry-run]
+
+permissions:
+  contents: write            # commit the updated Michael Kors sync database back to the repo
+
+concurrency:
+  group: michaelkors-sync
+  cancel-in-progress: false  # never run two Michael Kors syncs at once; queue instead
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240     # ~700 product pages at a 2 s gap + Shopify writes
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # Full Size Run is the official authorized Michael Kors importer for India (store owner, 2026-09-26).
+      # Watches are always excluded in code. Settings stored in the database (cli `set`) win over these.
+      MICHAEL_KORS_AUTHORIZED_IMPORTER: "true"
+      MICHAEL_KORS_DRY_RUN: "false"
+      MICHAEL_KORS_SYNC_INTERVAL_HOURS: "5"
+      MICHAEL_KORS_DEFAULT_ETA: "15–20 Days"
+      MICHAEL_KORS_NEW_PRODUCT_STATUS: ACTIVE
+      MICHAEL_KORS_PRICE_ROUNDING_MODE: NEAREST_1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/michaelkors.test.ts
+
+      - name: Run Michael Kors sync
+        run: |
+          mkdir -p logs
+          node src/michaelkors/cli.ts unlock
+          # the cloud reads michaelkors.com directly (sitemap + product pages, honest User-Agent, 2 s gap).
+          # A 403 / challenge / geo-redirect stops the run (SOURCE_SCAN_UNRELIABLE) - it is never bypassed.
+          node src/michaelkors/cli.ts set SOURCE_MODE http
+          node src/michaelkors/cli.ts set REQUEST_DELAY_MS 2000
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node src/michaelkors/cli.ts sync --dry-run --limit 3 --trigger push-check
+          elif [ "${{ github.event.inputs.mode }}" = "dry-run" ]; then
+            node src/michaelkors/cli.ts sync --dry-run --trigger manual
+          else
+            node src/michaelkors/cli.ts sync --live --trigger scheduler
+          fi
+
+      - name: Save Michael Kors database
+        if: always()
+        run: |
+          node src/michaelkors/cli.ts checkpoint
+          git config user.name "fsr-michaelkors-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/michaelkors-sync.sqlite
+          git diff --cached --quiet && exit 0
+          git commit -m "michaelkors sync: update database [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 10; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: michaelkors-sync-report-${{ github.run_id }}
+          path: logs/MICHAELKORS-SYNC-*.report.*
+          if-no-files-found: ignore
+          retention-days: 30
