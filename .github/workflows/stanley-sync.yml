@@ -1,0 +1,89 @@
+name: Stanley 1913 -> Full Size Run sync
+
+on:
+  schedule:
+    - cron: "45 */5 * * *"   # every 5 hours (UTC), offset from ON.com (:00), Gymshark (:15) and Rhode (:30). GitHub may start a few minutes late.
+  push:
+    branches: [main]
+    paths: [.github/workflows/stanley-sync.yml, src/stanley/**, test/stanley.test.ts]   # changed sync code runs once straight away
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "live or dry-run"
+        default: live
+        type: choice
+        options: [live, dry-run]
+
+permissions:
+  contents: write            # commit the updated Stanley sync database back to the repo
+
+concurrency:
+  group: stanley-sync
+  cancel-in-progress: false  # never run two Stanley syncs at once; queue instead
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120     # full catalog incl. a detail refresh takes ~20 min; unchanged runs a few minutes
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # Stanley settings (same as .env; `node src/stanley/cli.ts set` overrides stored in the database win)
+      # FSR is the official / authorised Stanley 1913 importer for India (stated by the store owner 2026-09-26)
+      STANLEY_AUTHORIZED_IMPORTER: "true"
+      STANLEY_ENABLED: "true"
+      STANLEY_DRY_RUN: "false"
+      STANLEY_TEST_MODE: "false"
+      STANLEY_FULL_SYNC: "true"
+      STANLEY_SYNC_INTERVAL_HOURS: "5"
+      STANLEY_PRICING_ADJUSTMENT_INR: "3000"
+      STANLEY_ETA: "15–20 Days"
+      USD_INR_RATE_MAX_AGE_HOURS: "24"
+      STANLEY_FX_PROVIDER: open.er-api.com
+      STANLEY_PRICE_ROUNDING_MODE: NONE
+      STANLEY_NEW_PRODUCT_STATUS: DRAFT
+      STANLEY_PRODUCT_MISSING_CONFIRMATION_SCANS: "2"
+      STANLEY_MISSING_ACTION: archive
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/stanley.test.ts
+
+      - name: Run Stanley sync
+        run: |
+          mkdir -p logs
+          node src/stanley/cli.ts unlock
+          if [ "${{ github.event.inputs.mode }}" = "dry-run" ]; then
+            node src/stanley/cli.ts sync --dry-run --trigger manual
+          else
+            node src/stanley/cli.ts sync --live --trigger scheduler
+          fi
+
+      - name: Save Stanley database
+        if: always()
+        run: |
+          node src/stanley/cli.ts checkpoint
+          git config user.name "fsr-stanley-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/stanley-sync.sqlite
+          git diff --cached --quiet && exit 0
+          git commit -m "stanley sync: update database [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 10; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stanley-sync-report-${{ github.run_number }}
+          path: logs/STANLEY-SYNC-*.report.*
+          retention-days: 30
