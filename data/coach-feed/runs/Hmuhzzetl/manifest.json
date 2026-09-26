@@ -1,0 +1,15 @@
+{
+  "run": "Hmuhzzetl",
+  "harvestedAt": "2026-09-26T07:49:59.872Z",
+  "startedAt": "2026-09-26T06:17:23.913Z",
+  "complete": true,
+  "listed": 1790,
+  "fetched": 1790,
+  "parsed": 1787,
+  "gone": 3,
+  "failed": 0,
+  "entries": 1790,
+  "stoppedReason": null,
+  "errors": [],
+  "source": "in-app browser on www.coach.com"
+}

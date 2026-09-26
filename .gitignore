@@ -9,3 +9,6 @@ data/*
 !data/michaelkors-sync.sqlite
 !data/alo-sync.sqlite
 !data/toryburch-sync.sqlite
+!data/coach-import.sqlite
+!data/coach-feed/
+!data/coach-reports/

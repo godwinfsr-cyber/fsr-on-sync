@@ -1,0 +1,105 @@
+name: COACH -> Full Size Run one-time import
+
+# ONE-TIME catalog import that runs in the cloud. There is deliberately NO schedule / cron: it runs only when started
+#   - from GitHub: Actions -> "COACH -> Full Size Run one-time import" -> Run workflow (choose the mode), or
+#   - by committing data/coach-feed/run-request.json ({"mode": "dry-run" | "test" | "full", "limit": 5, "status": "DRAFT"}).
+# A push that changes the Coach code only runs the unit tests + a 5-product dry run (no Shopify writes).
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run = no writes · test-5 / test-25 = create 5 / 25 products (DRAFT) · full = import everything"
+        default: dry-run
+        type: choice
+        options: [dry-run, test-5, test-25, full]
+      keys:
+        description: "optional: only these Coach product references, comma separated (e.g. CV933-IMXAQ)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths: [src/coach/**, test/coach.test.ts, .github/workflows/coach-import.yml, data/coach-feed/run-request.json]
+
+permissions:
+  contents: write            # commit the checkpoint database + reports back to the repo
+
+concurrency:
+  group: coach-import
+  cancel-in-progress: false  # never two Coach imports at once
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+      SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      SHOPIFY_STORE_DOMAIN: va9wah-fx.myshopify.com
+      # Full Size Run is an official / authorized COACH importer for India (store owner, 2026-09-26).
+      # Watches are always excluded in code. Restored (pre-owned) items are not imported (store owner, 2026-09-26).
+      COACH_DEFAULT_ETA: "15–20 Days"
+      COACH_NEW_PRODUCT_STATUS: ACTIVE
+      COACH_INCLUDE_RESTORED: "false"
+      COACH_SIZE_SYSTEM: UK
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2     # to see whether the last commit changed run-request.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: node --test test/coach.test.ts
+
+      - name: Decide what to run
+        id: plan
+        run: |
+          ev="${{ github.event_name }}"; mode="${{ github.event.inputs.mode }}"; keys="${{ github.event.inputs.keys }}"
+          args="--dry-run --limit 5"; trigger="push-check"
+          if [ "$ev" = "workflow_dispatch" ]; then
+            trigger="manual"
+            case "$mode" in
+              test-5) args="--limit 5" ;;
+              test-25) args="--limit 25" ;;
+              full) args="--full" ;;
+              *) args="--dry-run" ;;
+            esac
+          elif git diff --name-only HEAD~1 HEAD | grep -q '^data/coach-feed/run-request.json$'; then
+            trigger="run-request"
+            args=$(node -e 'const r=JSON.parse(require("fs").readFileSync("data/coach-feed/run-request.json","utf8"));const a=[];if(r.mode==="full")a.push("--full");else if(r.mode==="test")a.push("--limit",String(r.limit||5));else{a.push("--dry-run");if(r.limit)a.push("--limit",String(r.limit));}if(r.status)a.push("--status",r.status);if(r.keys)a.push("--keys",r.keys);console.log(a.join(" "))')
+          fi
+          [ -n "$keys" ] && args="$args --keys $keys"
+          echo "args=$args" >> "$GITHUB_OUTPUT"; echo "trigger=$trigger" >> "$GITHUB_OUTPUT"
+          echo "Coach import: $args ($trigger)"
+
+      - name: Run Coach import
+        run: |
+          mkdir -p logs
+          node src/coach/cli.ts unlock
+          node src/coach/cli.ts import ${{ steps.plan.outputs.args }} --trigger ${{ steps.plan.outputs.trigger }}
+
+      - name: Save checkpoint database + report
+        if: always()
+        run: |
+          node src/coach/cli.ts checkpoint
+          git config user.name "fsr-coach-import"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/coach-import.sqlite data/coach-reports
+          git diff --cached --quiet && exit 0
+          git commit -m "coach import: checkpoint + report [skip ci]"
+          for i in 1 2 3 4 5; do git pull --rebase && git push && exit 0; sleep 15; done
+          exit 1
+
+      - name: Keep run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-import-report-${{ github.run_id }}
+          path: logs/COACH-IMPORT-*
+          if-no-files-found: ignore
+          retention-days: 30
