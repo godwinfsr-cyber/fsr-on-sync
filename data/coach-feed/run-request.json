@@ -1,1 +1,1 @@
-{"mode":"test","limit":25,"status":"DRAFT","note":"test step 10: 25-product import as DRAFT"}
+{"mode":"test","limit":5,"status":"DRAFT","keys":"CFT65-O95,CV933-IMXAQ","note":"test step 11: duplicate detection - mainline+Outlet product already imported must NOT be created again"}
