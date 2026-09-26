@@ -267,6 +267,7 @@ export async function runCoachImport(o: ImportOptions): Promise<ImportReport> {
     }, stop);
     R.notReached = Math.max(0, R.uniqueEligible - R.imported - R.alreadyExisting - R.failed - R.needsReview - R.needsOwnPage.length - (dry ? R.dryRunSample.length : 0));
     if (R.needsOwnPage.length) {
+      fs.mkdirSync(path.join(ROOT, "data", "coach-reports"), { recursive: true });
       fs.writeFileSync(path.join(ROOT, "data", "coach-reports", "needs-own-page.json"), JSON.stringify(R.needsOwnPage.map((x) => x.url)));
       R.warnings.push(`${R.needsOwnPage.length} product(s) were seen only as variants on another style's page - not created; their own pages are listed in data/coach-reports/needs-own-page.json for the next harvest pass`);
     }

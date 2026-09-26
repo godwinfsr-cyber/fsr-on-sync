@@ -1,1 +1,1 @@
-{"mode":"dry-run","note":"full cloud dry run on the pass-1 feed (no Shopify writes)"}
+{"mode":"test","limit":5,"status":"DRAFT","keys":"CAF13-BLK,C4451-IMV2R,CAF55-B4MPL,CBD21-WHT,CAD63-SLV","note":"test step 8: 5-product import as DRAFT"}
