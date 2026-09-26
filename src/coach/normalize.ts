@@ -157,8 +157,11 @@ export function parseEntry(e: FeedEntry): Listing[] {
   const mainKey = str(e.main?.id) ? parseVariantId(String(e.main!.id)) : null;
   // the style whose page this is: Coach's canonical URL names it (/products/<slug>/<STYLE>[-<COLOUR>].html)
   const pageStyle = (styleFromUrl(e.canonical ?? e.finalUrl ?? sourceUrl) ?? str(base.productGroupID) ?? mainKey?.style ?? "").toUpperCase();
-  const ic = (e.itemCategory ?? []).filter((x) => x && !/^(hidden primary categories|system-hidden|all products)$/i.test(x));
-  const category = ic.length ? ic.join(" > ") : breadcrumbs.join(" > ") || null;
+  // Coach's internal merchandising buckets are not categories
+  const internal = (x: string) => !x || /^(hidden primary categories|system-hidden|all products|hidden)$/i.test(x.trim());
+  const ic = (e.itemCategory ?? []).filter((x) => !internal(x));
+  const bc = breadcrumbs.filter((x) => !internal(x));
+  const category = ic.length ? ic.join(" > ") : bc.join(" > ") || null;
   const collection = breadcrumbs.find((b) => /^(outlet|sale|new|new arrivals)$/i.test(b)) ?? ((e.itemCategory ?? [])[0] && /^(new|sale)$/i.test(e.itemCategory![0]) ? e.itemCategory![1] ?? e.itemCategory![0] : null) ?? null;
   const details = bullets(e.longDescription ?? e.webDesc);
   const features = details.filter((d) => !/^style no\./i.test(d));
